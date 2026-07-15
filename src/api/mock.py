@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
-from src.dependencies import require_permission
-from src.models.user import User
+from .dependencies import require_permission
+from .models.user import User
 
 router = APIRouter(prefix="/products", tags=["Mock Business"])
 

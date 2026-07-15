@@ -1,10 +1,10 @@
 from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.database import get_db
-from src.services.auth_service import AuthService
-from src.services.rbac_service import RbacService
-from src.models.user import User
+from .core.database import get_db
+from .services.auth_service import AuthService
+from .services.rbac_service import RbacService
+from .models.user import User
 
 security = HTTPBearer()
 
@@ -29,7 +29,7 @@ async def get_current_user(
 
     user_repo = auth_service.user_repo
     from sqlalchemy import select
-    from src.models.user import UserSession
+    from .models.user import UserSession
 
     result = await db.execute(select(UserSession).where(UserSession.token_jti == jti))
     session = result.scalars().first()

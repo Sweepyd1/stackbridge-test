@@ -1,7 +1,7 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.rbac import AccessRule, BusinessElement
-from src.schemas.rbac import AccessRuleCreate
+from .models.rbac import AccessRule, BusinessElement
+from .schemas.rbac import AccessRuleCreate
 
 
 class RbacRepository:

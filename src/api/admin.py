@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.database import get_db
-from src.services.rbac_service import RbacService
-from src.dependencies import require_permission
-from src.schemas.rbac import AccessRuleCreate, AccessRuleResponse
-from src.models.user import User
+from .core.database import get_db
+from .services.rbac_service import RbacService
+from .dependencies import require_permission
+from .schemas.rbac import AccessRuleCreate, AccessRuleResponse
+from .models.user import User
 
 router = APIRouter(prefix="/admin/rules", tags=["Admin RBAC"])
 

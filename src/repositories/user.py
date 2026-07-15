@@ -1,8 +1,8 @@
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.models.user import User, UserSession, Role
-from src.core.security import hash_password
-from src.schemas.user import UserRegister
+from .models.user import User, UserSession, Role
+from .core.security import hash_password
+from .schemas.user import UserRegister
 
 
 class UserRepository:

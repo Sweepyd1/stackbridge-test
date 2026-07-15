@@ -1,10 +1,10 @@
 import uuid
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.core.security import verify_password, create_access_token, decode_access_token
-from src.repositories.user_repo import UserRepository
-from src.schemas.user import UserRegister, UserLogin
-from src.models.user import User
+from .core.security import verify_password, create_access_token, decode_access_token
+from .repositories.user_repo import UserRepository
+from .schemas.user import UserRegister, UserLogin
+from .models.user import User
 
 
 class AuthService:

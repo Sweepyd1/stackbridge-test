@@ -1,8 +1,8 @@
 from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
-from src.repositories.rbac_repo import RbacRepository
-from src.models.user import User
-from src.schemas.rbac import AccessRuleCreate, AccessRuleResponse
+from .repositories.rbac_repo import RbacRepository
+from .models.user import User
+from .schemas.rbac import AccessRuleCreate, AccessRuleResponse
 
 
 class RbacService:
