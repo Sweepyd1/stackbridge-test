@@ -1,19 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from sqlalchemy.ext.asyncio import AsyncSession
 from core.database import get_db
 from services.auth import AuthService
 from schemas.user import UserRegister, UserLogin, TokenResponse, UserResponse
-from core.dependencies import get_current_user
+from core.dependencies import get_auth_service, get_current_user
 from models.user import User
+from core.config import settings
 
 router = APIRouter(prefix="/auth", tags=["Authentication"])
 
-
-@router.post(
-    "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
-)
-async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
-    auth_service = AuthService(db)
+@router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
+async def register(
+    data: UserRegister, 
+    auth_service: AuthService = Depends(get_auth_service)
+):
     user = await auth_service.register(data)
     return UserResponse(
         id=user.id,
@@ -23,18 +23,34 @@ async def register(data: UserRegister, db: AsyncSession = Depends(get_db)):
         role_name=user.role.name,
     )
 
-
 @router.post("/login", response_model=TokenResponse)
-async def login(data: UserLogin, db: AsyncSession = Depends(get_db)):
-    auth_service = AuthService(db)
-    return await auth_service.login(data)
-
+async def login(
+    data: UserLogin, 
+    response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
+    
+):
+    token_data = await auth_service.login(data)
+    
+    response.set_cookie(
+        key="access_token",
+        value=token_data["access_token"],
+        httponly=True,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax"
+    )
+    return token_data
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)
-async def logout(request: Request, db: AsyncSession = Depends(get_db)):
-    auth_header = request.headers.get("Authorization")
-    if not auth_header or not auth_header.startswith("Bearer "):
-        raise HTTPException(status_code=401, detail="Missing token")
-    token = auth_header.split(" ")[1]
-    auth_service = AuthService(db)
+async def logout(
+    request: Request,
+    response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
+    
+):
+    token = request.cookies.get("access_token")
+    if not token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    
     await auth_service.logout(token)
+    response.delete_cookie(key="access_token")

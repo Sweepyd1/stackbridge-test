@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy import String, Boolean, ForeignKey
-from .models.base import Base, TimestampMixin
+from .base import Base, TimestampMixin
 
 
 class Role(Base):

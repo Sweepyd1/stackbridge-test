@@ -1,6 +1,6 @@
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String, Boolean, ForeignKey
-from .models.base import Base
+from .base import Base
 
 
 class BusinessElement(Base):

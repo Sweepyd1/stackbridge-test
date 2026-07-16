@@ -1,8 +1,8 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from app.models.user import Role, BusinessElement
-from app.core.security import hash_password
+from ..models.user import Role, BusinessElement
+from ..models.rbac import AccessRule
 
 @pytest.mark.asyncio
 async def test_register_and_login(client: AsyncClient, db_session: AsyncSession):
@@ -24,6 +24,8 @@ async def test_register_and_login(client: AsyncClient, db_session: AsyncSession)
     })
     assert login_response.status_code == 200
     assert "access_token" in login_response.json()
+    
+    assert "access_token" in client.cookies
 
 @pytest.mark.asyncio
 async def test_rbac_forbidden_and_allowed(client: AsyncClient, db_session: AsyncSession):
@@ -35,7 +37,7 @@ async def test_rbac_forbidden_and_allowed(client: AsyncClient, db_session: Async
     db_session.add(product_element)
     await db_session.commit()
 
-    response = await client.post("/auth/register", json={
+    await client.post("/auth/register", json={
         "first_name": "Jane", "last_name": "Doe", 
         "email": "jane@test.com", "password": "password123"
     })
@@ -43,16 +45,16 @@ async def test_rbac_forbidden_and_allowed(client: AsyncClient, db_session: Async
     login_response = await client.post("/auth/login", json={
         "email": "jane@test.com", "password": "password123"
     })
+    
     token = login_response.json()["access_token"]
-    headers = {"Authorization": f"Bearer {token}"}
+    client.cookies.set("access_token", token)
 
-    forbidden_response = await client.get("/products/", headers=headers)
+    forbidden_response = await client.get("/products/")
     assert forbidden_response.status_code == 403
 
-    from app.models.rbac import AccessRule
     rule = AccessRule(role_id=2, element_id=1, read=True, read_all=True)
     db_session.add(rule)
     await db_session.commit()
 
-    allowed_response = await client.get("/products/", headers=headers)
+    allowed_response = await client.get("/products/")
     assert allowed_response.status_code == 200
