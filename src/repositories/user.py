@@ -1,9 +1,11 @@
 from sqlalchemy import select
-from sqlalchemy.orm import selectinload
 from sqlalchemy.ext.asyncio import AsyncSession
-from models.user import User, UserSession
+from sqlalchemy.orm import selectinload
+
 from core.security import hash_password
+from models.user import User, UserSession
 from schemas.user import UserRegister
+
 
 class UserRepository:
     def __init__(self, session: AsyncSession):
@@ -27,11 +29,11 @@ class UserRepository:
             last_name=data.last_name,
             email=data.email,
             hashed_password=hash_password(data.password),
-            role_id=role_id
+            role_id=role_id,
         )
         self.session.add(user)
         await self.session.commit()
-        
+
         result = await self.session.execute(
             select(User).options(selectinload(User.role)).where(User.id == user.id)
         )
@@ -41,11 +43,15 @@ class UserRepository:
         user.is_active = False
         await self.session.commit()
 
-    async def update(self, user: User, first_name: str | None, last_name: str | None) -> User:
-        if first_name: user.first_name = first_name
-        if last_name: user.last_name = last_name
+    async def update(
+        self, user: User, first_name: str | None, last_name: str | None
+    ) -> User:
+        if first_name:
+            user.first_name = first_name
+        if last_name:
+            user.last_name = last_name
         await self.session.commit()
-        
+
         result = await self.session.execute(
             select(User).options(selectinload(User.role)).where(User.id == user.id)
         )

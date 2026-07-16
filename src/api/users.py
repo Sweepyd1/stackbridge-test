@@ -1,14 +1,12 @@
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from core.database import get_db
-from repositories.user import UserRepository
+from fastapi import APIRouter, Depends, status
+
 from core.dependencies import get_current_user, get_user_repository
-from schemas.user import UserUpdate, UserResponse
 from models.user import User
-
-
+from repositories.user import UserRepository
+from schemas.user import UserResponse, UserUpdate
 
 router = APIRouter(prefix="/users", tags=["Users"])
+
 
 @router.get("/me", response_model=UserResponse)
 async def get_me(user: User = Depends(get_current_user)):
@@ -20,11 +18,12 @@ async def get_me(user: User = Depends(get_current_user)):
         role_name=user.role.name,
     )
 
+
 @router.patch("/me", response_model=UserResponse)
 async def update_me(
-    data: UserUpdate, 
+    data: UserUpdate,
     user: User = Depends(get_current_user),
-    user_repo: UserRepository = Depends(get_user_repository)
+    user_repo: UserRepository = Depends(get_user_repository),
 ):
     updated_user = await user_repo.update(user, data.first_name, data.last_name)
     return UserResponse(
@@ -35,9 +34,10 @@ async def update_me(
         role_name=updated_user.role.name,
     )
 
+
 @router.delete("/me", status_code=status.HTTP_204_NO_CONTENT)
 async def delete_me(
-    user: User = Depends(get_current_user), 
-    user_repo: UserRepository = Depends(get_user_repository)
+    user: User = Depends(get_current_user),
+    user_repo: UserRepository = Depends(get_user_repository),
 ):
     await user_repo.soft_delete(user)

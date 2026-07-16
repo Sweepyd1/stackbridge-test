@@ -1,7 +1,7 @@
 from fastapi import HTTPException, status
-from sqlalchemy.ext.asyncio import AsyncSession
-from repositories.rbac import RbacRepository
+
 from models.user import User
+from repositories.rbac import RbacRepository
 from schemas.rbac import AccessRuleCreate, AccessRuleResponse
 
 
@@ -9,10 +9,14 @@ class RbacService:
     def __init__(self, rbac_repo: RbacRepository):
         self.rbac_repo = rbac_repo
 
-    async def check_permission(self, user: User, element_name: str, action: str, owner_id: int | None = None) -> bool:
+    async def check_permission(
+        self, user: User, element_name: str, action: str, owner_id: int | None = None
+    ) -> bool:
         element = await self.rbac_repo.get_element_by_name(element_name)
         if not element:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found")
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail="Resource not found"
+            )
 
         rule = await self.rbac_repo.get_rule(user.role_id, element.id)
         if not rule:
@@ -24,7 +28,7 @@ class RbacService:
             return rule.update_all or (rule.update and owner_id == user.id)
         if action == "delete":
             return rule.delete_all or (rule.delete and owner_id == user.id)
-        
+
         return getattr(rule, action, False)
 
     async def create_rule(self, data: AccessRuleCreate) -> AccessRuleResponse:

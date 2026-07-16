@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+
 from core.dependencies import require_permission
 from models.user import User
 
