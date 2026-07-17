@@ -5,8 +5,9 @@ from sqlalchemy import select
 
 from api import admin, auth, mock, users
 from core.database import AsyncSessionLocal
+from core.security import hash_password
 from models.rbac import BusinessElement
-from models.user import Role
+from models.user import Role, User
 
 
 @contextlib.asynccontextmanager
@@ -28,6 +29,16 @@ async def lifespan(app: FastAPI):
                 BusinessElement(id=2, name="access_rules"),
             ]
             session.add_all(default_elements)
+
+            admin_user = User(
+                first_name="Admin",
+                last_name="System",
+                email="admin@example.com",
+                hashed_password=hash_password("admin123456"),
+                role_id=1,
+                is_active=True,
+            )
+            session.add(admin_user)
 
             await session.commit()
 
