@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:15-alpine
     env_file:
-      - .env
+      - .env.docker
     ports:
       - "5432:5432"
     volumes:
@@ -18,9 +18,7 @@ services:
     ports:
       - "8001:8001"
     env_file:
-      - .env
-    environment:
-      DATABASE_URL: postgresql+asyncpg://app_user:secure_password@db:5432/app_db
+      - .env.docker
     volumes:
       - .:/app
     depends_on:
