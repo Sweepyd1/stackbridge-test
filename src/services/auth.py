@@ -23,6 +23,13 @@ class AuthService:
         default_role_id = 3
         return await self.user_repo.create(data, default_role_id)
 
+    async def create_token_for_user(self, user: User) -> dict:
+        jti = str(uuid.uuid4())
+        token = create_access_token({"sub": str(user.id), "jti": jti})
+        await self.user_repo.save_session(user.id, jti)
+
+        return {"access_token": token, "token_type": "bearer"}
+
     async def login(self, data: UserLogin) -> dict:
         user = await self.user_repo.get_by_email(data.email)
         if not user or not verify_password(data.password, user.hashed_password):
@@ -36,11 +43,7 @@ class AuthService:
                 status_code=status.HTTP_403_FORBIDDEN, detail="Account is deactivated"
             )
 
-        jti = str(uuid.uuid4())
-        token = create_access_token({"sub": str(user.id), "jti": jti})
-        await self.user_repo.save_session(user.id, jti)
-
-        return {"access_token": token, "token_type": "bearer"}
+        return await self.create_token_for_user(user)
 
     async def logout(self, token: str) -> None:
         try:

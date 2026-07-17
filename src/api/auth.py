@@ -12,9 +12,22 @@ router = APIRouter(prefix="/auth", tags=["Authentication"])
     "/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED
 )
 async def register(
-    data: UserRegister, auth_service: AuthService = Depends(get_auth_service)
+    data: UserRegister,
+    response: Response,
+    auth_service: AuthService = Depends(get_auth_service),
 ):
     user = await auth_service.register(data)
+
+    token_data = await auth_service.create_token_for_user(user)
+
+    response.set_cookie(
+        key="access_token",
+        value=token_data["access_token"],
+        httponly=True,
+        max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
+        samesite="lax",
+    )
+
     return UserResponse(
         id=user.id,
         first_name=user.first_name,
