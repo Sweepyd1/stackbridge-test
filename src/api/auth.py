@@ -52,7 +52,6 @@ async def login(
         max_age=settings.ACCESS_TOKEN_EXPIRE_MINUTES * 60,
         samesite="lax",
     )
-    return token_data
 
 
 @router.post("/logout", status_code=status.HTTP_204_NO_CONTENT)

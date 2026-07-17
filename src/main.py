@@ -31,10 +31,10 @@ async def lifespan(app: FastAPI):
             session.add_all(default_elements)
 
             admin_user = User(
-                first_name="Admin",
-                last_name="System",
+                first_name="admin",
+                last_name="admin",
                 email="admin@example.com",
-                hashed_password=hash_password("admin123456"),
+                hashed_password=hash_password("admin123"),
                 role_id=1,
                 is_active=True,
             )
